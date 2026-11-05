@@ -1,7 +1,7 @@
 #Subclass Motorcycle.
 
 from vehicle import Vehicle
-# [BARU] Import custom exception dari errors.py.
+# [BARU] Import ini custom exception dari errors.py.
 from errors import InvalidDataError
 
 class Motorcycle(Vehicle):
@@ -10,7 +10,7 @@ class Motorcycle(Vehicle):
     def __init__(self, plate_number: str, brand: str, daily_rate: int, motor_type: str):
         super().__init__(plate_number, brand, daily_rate)
         # [UBAH] Sebelumnya `self.__motor_type = motor_type` (tanpa validasi).
-        # Sekarang lewat setter agar nilai divalidasi.
+        # Sekarang dia lewat setter agar nilai divalidasi.
         self.motor_type = motor_type
 
     @property

@@ -2,7 +2,7 @@
 
 from insurance_mixin import InsuranceMixin
 from vehicle import Vehicle
-# [BARU] Import custom exception dari errors.py.
+# [BARU] Import ini custom exception dari errors.py.
 from errors import InvalidDataError
 
 class Van(InsuranceMixin, Vehicle):

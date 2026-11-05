@@ -46,10 +46,10 @@ class Customer:
 
     @classmethod
     def from_string(cls, customer_id: str, text: str) -> "Customer":
-        # [BARU] Validasi format teks. Sebelumnya langsung di-split, sehingga format salah
+        # [BARU] Validasi format teks. di code Sebelumnya langsung di-split, sehingga format salah
         # memunculkan error bawaan Python. Sekarang -> InvalidDataError dengan pesan jelas.
         if not isinstance(text, str) or text.count(";") != 1:
-            raise InvalidDataError("customer_text", text, "Format pelanggan harus 'Nama;NomorTelepon'.")
+            raise InvalidDataError("customer_text", text, "Format untuk pelanggan harus 'Nama;NomorTelepon'.")
         name, phone = text.split(";")
         return cls(customer_id, name.strip(), phone.strip())
 
