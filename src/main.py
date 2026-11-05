@@ -3,13 +3,13 @@
 # pengembalian kendaraan, dan pengecekan MRO.
 
 # Mengimpor modul atau class yang digunakan file ini.
-from car import Car
-from customer import Customer
-from invoice import Invoice
-from motorcycle import Motorcycle
-from rental_manager import RentalManager
-from van import Van
-from vehicle import Vehicle
+from src.car import Car
+from src.customer import Customer
+from src.invoice import Invoice
+from src.motorcycle import Motorcycle
+from src.rental_manager import RentalManager
+from src.van import Van
+from src.vehicle import Vehicle
 
 
 if __name__ == "__main__":

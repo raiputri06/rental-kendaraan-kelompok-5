@@ -4,10 +4,10 @@
 
 
 # Mengimpor modul atau class yang digunakan file ini.
-from customer import Customer
-from invoice import Invoice
-from rental import Rental
-from vehicle import Vehicle
+from src.customer import Customer
+from src.invoice import Invoice
+from src.rental import Rental
+from src.vehicle import Vehicle
 
 
 # Mendefinisikan class RentalManager.

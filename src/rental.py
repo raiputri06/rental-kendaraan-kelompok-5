@@ -4,13 +4,13 @@
 
 
 # Mengimpor modul atau class yang digunakan file ini.
-from customer import Customer
+from src.customer import Customer
 # Mengimpor modul atau class yang digunakan file ini.
-from insurance_mixin import InsuranceMixin
+from src.insurance_mixin import InsuranceMixin
 # Mengimpor modul atau class yang digunakan file ini.
-from invoice import Invoice
+from src.invoice import Invoice
 # Mengimpor modul atau class yang digunakan file ini.
-from vehicle import Vehicle
+from src.vehicle import Vehicle
 
 
 # Mendefinisikan class Rental.
