@@ -1,102 +1,77 @@
 # Satu transaksi sewa.
-# KONSEP: composition (Invoice dibuat di constructor), association
-# (Customer dan Vehicle diterima dari luar), class attribute untuk status.
 
+from customer import Customer
+from insurance_mixin import InsuranceMixin
+from invoice import Invoice
+from vehicle import Vehicle
+# [BARU] Import ini custom exception dari errors.py.
+from errors import InvalidDataError, RentalStateError
 
-# Mengimpor modul atau class yang digunakan file ini.
-from src.customer import Customer
-# Mengimpor modul atau class yang digunakan file ini.
-from src.insurance_mixin import InsuranceMixin
-# Mengimpor modul atau class yang digunakan file ini.
-from src.invoice import Invoice
-# Mengimpor modul atau class yang digunakan file ini.
-from src.vehicle import Vehicle
-
-
-# Mendefinisikan class Rental.
 class Rental:
-    # Mengisi atau memperbarui nilai variabel/atribut.
-    STATUS_ACTIVE = "Aktif"    # class attribute
-    # Mengisi atau memperbarui nilai variabel/atribut.
-    STATUS_DONE = "Selesai"    # class attribute
+    STATUS_ACTIVE = "Aktif"
+    STATUS_DONE = "Selesai"
 
-    # Mendefinisikan method/fungsi __init__.
     def __init__(self, rental_id: str, customer: Customer, vehicle: Vehicle, days: int):
-        # Memeriksa kondisi sebelum menjalankan blok berikutnya.
-        if not isinstance(days, int) or days <= 0:
-            # Menghentikan proses dengan melempar error.
-            raise ValueError("Lama sewa harus bilangan bulat lebih dari 0 hari.")
-        # Mengisi atau memperbarui nilai variabel/atribut.
+        # [BARU] Empat validasi berikut (rental_id, customer, vehicle, days).
+        # Sebelumnya hanya `days` yang diperiksa.
+        if not isinstance(rental_id, str) or not rental_id.strip():
+            raise InvalidDataError("rental_id", rental_id, "ID rental tidak boleh kosong.")
+        if not isinstance(customer, Customer):
+            raise InvalidDataError("customer", customer, "Data pelanggan tidak valid.")
+        if not isinstance(vehicle, Vehicle):
+            raise InvalidDataError("vehicle", vehicle, "Data kendaraan tidak valid.")
+        # [UBAH] Ditambah cek `bool`; ValueError -> InvalidDataError.
+        # Aturan bisnis #5: lama sewa minimal 1 hari.
+        if isinstance(days, bool) or not isinstance(days, int) or days <= 0:
+            raise InvalidDataError("days", days, "Lama sewa harus bilangan bulat lebih dari 0 hari.")
         self.__rental_id = rental_id
-        # Mengisi atau memperbarui nilai variabel/atribut.
-        self.__customer = customer  # ASSOCIATION: diterima dari luar
-        # Mengisi atau memperbarui nilai variabel/atribut.
-        self.__vehicle = vehicle    # ASSOCIATION: diterima dari luar
-        # Mengisi atau memperbarui nilai variabel/atribut.
+        self.__customer = customer
+        self.__vehicle = vehicle
         self.__days = days
-        # Mengisi atau memperbarui nilai variabel/atribut.
-        self.__status = Rental.STATUS_ACTIVE
-        # COMPOSITION: Invoice dibuat DI DALAM constructor Rental
-        # Mengisi atau memperbarui nilai variabel/atribut.
+        self.__status = self.STATUS_ACTIVE
         insurance = vehicle.insurance_fee(days) if isinstance(vehicle, InsuranceMixin) else 0
-        # Mengisi atau memperbarui nilai variabel/atribut.
         self.__invoice = Invoice(vehicle.daily_rate * days, insurance)
 
-    # Mendefinisikan method/fungsi rental_id.
     @property
     def rental_id(self) -> str:
-        # Mengembalikan hasil dari method/fungsi.
         return self.__rental_id
 
-    # Mendefinisikan method/fungsi customer.
     @property
     def customer(self) -> Customer:
-        # Mengembalikan hasil dari method/fungsi.
         return self.__customer
 
-    # Mendefinisikan method/fungsi vehicle.
     @property
     def vehicle(self) -> Vehicle:
-        # Mengembalikan hasil dari method/fungsi.
         return self.__vehicle
 
-    # Mendefinisikan method/fungsi status.
     @property
     def status(self) -> str:
-        # Mengembalikan hasil dari method/fungsi.
         return self.__status
 
-    # Mendefinisikan method/fungsi is_active.
     @property
     def is_active(self) -> bool:
-        # Mengembalikan hasil dari method/fungsi.
-        return self.__status == Rental.STATUS_ACTIVE
+        return self.__status == self.STATUS_ACTIVE
 
-    # Mendefinisikan method/fungsi total_price.
     @property
     def total_price(self) -> int:
-        # Mengembalikan hasil dari method/fungsi.
         return self.__invoice.total
 
-    # Mendefinisikan method/fungsi start.
     def start(self) -> None:
-        # Menjalankan pemanggilan fungsi atau method.
+        # [BARU] Cek status sebelum kendaraan ditandai disewa. Sebelumnya start() langsung
+        # memanggil mark_rented() tanpa cek. Gagal -> RentalStateError.
+        if not self.is_active:
+            raise RentalStateError(self.rental_id, self.status, f"Rental {self.rental_id} tidak dapat dimulai karena statusnya bukan Aktif.")
         self.__vehicle.mark_rented()
 
-    # Mendefinisikan method/fungsi finish.
     def finish(self) -> None:
-        # Memeriksa kondisi sebelum menjalankan blok berikutnya.
+        # [UBAH] RuntimeError -> RentalStateError.
+        # Aturan bisnis #7: transaksi yang sudah selesai tidak bisa dikembalikan dua kali.
         if not self.is_active:
-            # Menghentikan proses dengan melempar error.
-            raise RuntimeError(f"Rental {self.rental_id} sudah selesai.")
-        # Menjalankan pemanggilan fungsi atau method.
+            raise RentalStateError(self.rental_id, self.status, f"Rental {self.rental_id} sudah selesai dan tidak dapat dikembalikan lagi.")
         self.__vehicle.mark_returned()
-        # Mengisi atau memperbarui nilai variabel/atribut.
-        self.__status = Rental.STATUS_DONE
+        self.__status = self.STATUS_DONE
 
-    # Mendefinisikan method/fungsi receipt.
     def receipt(self) -> str:
-        # Mengembalikan hasil dari method/fungsi.
         return "\n".join([
             "========== STRUK RENTAL ==========",
             f"ID Rental    : {self.rental_id}",
@@ -108,8 +83,5 @@ class Rental:
             "==================================",
         ])
 
-    # __str__: teks yang tampil saat objek di-print atau di-str().
-    # Mendefinisikan method/fungsi __str__.
     def __str__(self) -> str:
-        # Mengembalikan hasil dari method/fungsi.
         return f"[{self.rental_id}] {self.customer.name} - {self.vehicle.brand} ({self.status})"
